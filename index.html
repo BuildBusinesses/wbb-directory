@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WBB Membership Directory</title>
+<style>
+  :root {
+    --wbb-forest-green: #0B2B26;
+    --wbb-ochre: #D39E59;
+    --wbb-cream: #FAF6F0;
+    --wbb-text-muted: #666666;
+  }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--wbb-cream);
+    margin: 0;
+    padding: 0;
+  }
+  .wbb-directory-header {
+    background-color: var(--wbb-forest-green);
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .wbb-directory-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+  }
+  .wbb-directory-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 40px;
+    padding: 60px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .wbb-member-card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    width: 240px;
+    transition: transform 0.2s;
+  }
+  .wbb-member-card:hover {
+    transform: translateY(-5px);
+  }
+  .wbb-member-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+    border: 3px solid var(--wbb-ochre);
+  }
+  .wbb-member-name {
+    font-weight: bold;
+    font-size: 22px;
+    color: var(--wbb-forest-green);
+    margin: 0;
+  }
+  .wbb-member-business {
+    color: var(--wbb-text-muted);
+    font-size: 16px;
+    margin: 8px 0 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="wbb-directory-header">
+  <h1>WBB Member Directory</h1>
+</div>
+
+<div id="wbb-member-directory" class="wbb-directory-grid"></div>
+
+<script>
+  // Calls the Netlify serverless function that securely proxies JotForm.
+  fetch('/.netlify/functions/directory')
+    .then(response => response.json())
+    .then(members => {
+      const directoryContainer = document.getElementById('wbb-member-directory');
+      directoryContainer.innerHTML = '';
+
+      members.forEach(member => {
+        const memberCard = document.createElement('div');
+        memberCard.className = 'wbb-member-card';
+        memberCard.innerHTML = `
+          <img class="wbb-member-photo" src="${member.photo || 'https://via.placeholder.com/150'}" alt="${member.name}">
+          <p class="wbb-member-name">${member.name}</p>
+          <p class="wbb-member-business">${member.businessName}</p>
+        `;
+        directoryContainer.appendChild(memberCard);
+      });
+    })
+    .catch(error => {
+      console.error('WBB directory load error:', error);
+      document.getElementById('wbb-member-directory').innerHTML = '<p>Error loading directory data.</p>';
+    });
+</script>
+
+</body>
+</html>
