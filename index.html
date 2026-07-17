@@ -63,9 +63,20 @@
     margin: 0;
   }
   .wbb-member-business {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     color: var(--wbb-text-muted);
     font-size: 16px;
     margin: 8px 0 0;
+  }
+  .wbb-member-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 </style>
 </head>
@@ -91,7 +102,10 @@
         memberCard.innerHTML = `
           <img class="wbb-member-photo" src="${member.photo || 'https://via.placeholder.com/150'}" alt="${member.name}">
           <p class="wbb-member-name">${member.name}</p>
-          <p class="wbb-member-business">${member.businessName}</p>
+          <p class="wbb-member-business">
+            ${member.businessLogo ? `<img class="wbb-member-logo" src="${member.businessLogo}" alt="${member.businessName} logo">` : ''}
+            ${member.businessName}
+          </p>
         `;
         directoryContainer.appendChild(memberCard);
       });
