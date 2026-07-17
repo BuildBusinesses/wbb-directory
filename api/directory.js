@@ -1,16 +1,14 @@
-// netlify/functions/directory.js
+// api/directory.js
 // Secure serverless backend: fetches ACTIVE member submissions from JotForm
 // and returns a normalized member list for the WBB frontend directory widget.
 
 const JOTFORM_FORM_ID = '242347443170149';
 const JOTFORM_SUBMISSIONS_LIMIT = 1000;
 
-exports.handler = async function directoryHandler(event, context) {
-  const responseHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET',
-    'Content-Type': 'application/json'
-  };
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Content-Type', 'application/json');
 
   try {
     const jotformApiKey = process.env.JOTFORM_API_KEY;
@@ -21,11 +19,8 @@ exports.handler = async function directoryHandler(event, context) {
     const jotformResponse = await fetch(jotformSubmissionsUrl);
 
     if (!jotformResponse.ok) {
-      return {
-        statusCode: jotformResponse.status,
-        headers: responseHeaders,
-        body: JSON.stringify({ error: 'Jotform API error' })
-      };
+      res.status(jotformResponse.status).json({ error: 'Jotform API error' });
+      return;
     }
 
     const jotformData = await jotformResponse.json();
@@ -53,17 +48,9 @@ exports.handler = async function directoryHandler(event, context) {
         };
       });
 
-    return {
-      statusCode: 200,
-      headers: responseHeaders,
-      body: JSON.stringify(activeMembers)
-    };
+    res.status(200).json(activeMembers);
 
   } catch (error) {
-    return {
-      statusCode: 500,
-      headers: responseHeaders,
-      body: JSON.stringify({ error: 'Internal Server Error', details: error.message })
-    };
+    res.status(500).json({ error: 'Internal Server Error', details: error.message });
   }
-};
+}

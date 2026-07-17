@@ -79,7 +79,7 @@
 
 <script>
   // Calls the Netlify serverless function that securely proxies JotForm.
-  fetch('/.netlify/functions/directory')
+  fetch('/api/directory')
     .then(response => response.json())
     .then(members => {
       const directoryContainer = document.getElementById('wbb-member-directory');
