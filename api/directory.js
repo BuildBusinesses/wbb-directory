@@ -25,7 +25,7 @@ export default async function handler(req, res) {
 
     const jotformData = await jotformResponse.json();
 
-    const activeMembers = jotformData.content
+    const submissions = jotformData.content
       .filter(submission => submission.status === 'ACTIVE')
       .map(submission => {
         const submissionAnswers = submission.answers;
@@ -47,6 +47,41 @@ export default async function handler(req, res) {
           status: answersByLabel['status'] || 'Active'
         };
       });
+
+    // Group submissions by member name (case-insensitive), newest first, so we
+    // can merge repeat submissions from the same member into one profile.
+    const submissionsByName = new Map();
+
+    for (const submission of submissions) {
+      const key = submission.name.toLowerCase().trim() || `__unnamed_${submission.id}`;
+      if (!submissionsByName.has(key)) {
+        submissionsByName.set(key, []);
+      }
+      submissionsByName.get(key).push(submission);
+    }
+
+    const mergedMembers = [];
+
+    for (const memberSubmissions of submissionsByName.values()) {
+      memberSubmissions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
+
+      const merged = { ...memberSubmissions[0] };
+
+      for (const field of ['name', 'businessName', 'photo', 'status']) {
+        if (!merged[field]) {
+          const fallback = memberSubmissions.find(submission => submission[field]);
+          if (fallback) {
+            merged[field] = fallback[field];
+          }
+        }
+      }
+
+      mergedMembers.push(merged);
+    }
+
+    const activeMembers = mergedMembers.filter(
+      member => member.status.toLowerCase().trim() === 'active'
+    );
 
     res.status(200).json(activeMembers);
 
