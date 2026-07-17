@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WBB Membership Directory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --wbb-forest-green: #0B2B26;
@@ -43,6 +46,10 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     text-align: center;
     width: 240px;
+    height: 330px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     transition: transform 0.2s;
   }
   .wbb-member-card:hover {
@@ -55,26 +62,48 @@
     object-fit: cover;
     margin-bottom: 16px;
     border: 3px solid var(--wbb-ochre);
+    flex-shrink: 0;
+  }
+  .wbb-member-photo--placeholder {
+    object-fit: contain;
+    box-sizing: border-box;
+    padding: 22px;
+    background-color: var(--wbb-cream);
   }
   .wbb-member-name {
-    font-weight: bold;
+    font-family: 'Barlow', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
     font-size: 22px;
-    color: var(--wbb-forest-green);
+    line-height: 1.2;
+    color: #4D0011;
     margin: 0;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .wbb-member-business {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
     color: var(--wbb-text-muted);
-    font-size: 16px;
+    font-size: 15px;
     margin: 8px 0 0;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .wbb-member-business span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .wbb-member-logo {
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
     object-fit: contain;
     flex-shrink: 0;
   }
@@ -99,12 +128,17 @@
       members.forEach(member => {
         const memberCard = document.createElement('div');
         memberCard.className = 'wbb-member-card';
+
+        const hasPhoto = Boolean(member.photo);
+        const photoClass = hasPhoto ? 'wbb-member-photo' : 'wbb-member-photo wbb-member-photo--placeholder';
+        const photoSrc = hasPhoto ? member.photo : '/wbb-logo-burgundy.svg';
+
         memberCard.innerHTML = `
-          <img class="wbb-member-photo" src="${member.photo || 'https://via.placeholder.com/150'}" alt="${member.name}">
+          <img class="${photoClass}" src="${photoSrc}" alt="${member.name}">
           <p class="wbb-member-name">${member.name}</p>
           <p class="wbb-member-business">
             ${member.businessLogo ? `<img class="wbb-member-logo" src="${member.businessLogo}" alt="${member.businessName} logo">` : ''}
-            ${member.businessName}
+            <span>${member.businessName}</span>
           </p>
         `;
         directoryContainer.appendChild(memberCard);
