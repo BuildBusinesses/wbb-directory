@@ -38,32 +38,45 @@ export default async function handler(req, res) {
           }
         }
 
+        // "Business Owner" is a JotForm Full Name control, so the name comes
+        // back as { first, last } sub-answers rather than a single string.
+        const businessOwner = answersByLabel['business owner'] || {};
+        const name = [businessOwner.first, businessOwner.last]
+          .filter(Boolean)
+          .join(' ')
+          .trim();
+
         return {
           id: submission.id,
           dateCreated: submission.created_at,
-          name: answersByLabel['name'] || '',
+          name,
           businessName: answersByLabel['business name'] || '',
           photo: answersByLabel['headshot'] || '',
           businessLogo: answersByLabel['business logo'] || '',
           status: answersByLabel['status'] || 'Active'
         };
-      });
+      })
+      // Drop placeholder/test entries left over from building the form.
+      .filter(submission => !/^textbox_sample/i.test(submission.businessName));
 
-    // Group submissions by member name (case-insensitive), newest first, so we
-    // can merge repeat submissions from the same member into one profile.
-    const submissionsByName = new Map();
+    // Group submissions by business name (case-insensitive), newest first, so
+    // we can merge repeat submissions from the same member into one profile.
+    // Business name is the more reliable identity key here since a member's
+    // typed name can vary slightly between submissions (e.g. "Tim" vs.
+    // "Timothy"), while their business name stays consistent.
+    const submissionsByBusinessName = new Map();
 
     for (const submission of submissions) {
-      const key = submission.name.toLowerCase().trim() || `__unnamed_${submission.id}`;
-      if (!submissionsByName.has(key)) {
-        submissionsByName.set(key, []);
+      const key = submission.businessName.toLowerCase().trim() || `__unnamed_${submission.id}`;
+      if (!submissionsByBusinessName.has(key)) {
+        submissionsByBusinessName.set(key, []);
       }
-      submissionsByName.get(key).push(submission);
+      submissionsByBusinessName.get(key).push(submission);
     }
 
     const mergedMembers = [];
 
-    for (const memberSubmissions of submissionsByName.values()) {
+    for (const memberSubmissions of submissionsByBusinessName.values()) {
       memberSubmissions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
 
       const merged = { ...memberSubmissions[0] };
