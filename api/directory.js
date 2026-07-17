@@ -43,7 +43,8 @@ export default async function handler(req, res) {
           dateCreated: submission.created_at,
           name: answersByLabel['name'] || '',
           businessName: answersByLabel['business name'] || '',
-          photo: answersByLabel['photo'] || '',
+          photo: answersByLabel['headshot'] || '',
+          businessLogo: answersByLabel['business logo'] || '',
           status: answersByLabel['status'] || 'Active'
         };
       });
@@ -67,7 +68,7 @@ export default async function handler(req, res) {
 
       const merged = { ...memberSubmissions[0] };
 
-      for (const field of ['name', 'businessName', 'photo', 'status']) {
+      for (const field of ['name', 'businessName', 'photo', 'businessLogo', 'status']) {
         if (!merged[field]) {
           const fallback = memberSubmissions.find(submission => submission[field]);
           if (fallback) {
