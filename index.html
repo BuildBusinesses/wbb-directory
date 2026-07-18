@@ -30,6 +30,15 @@
     margin: 0;
     font-size: 2.5rem;
   }
+  .wbb-directory-section-title {
+    text-align: center;
+    font-family: 'Barlow', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    color: var(--wbb-forest-green);
+    font-size: 1.8rem;
+    margin: 0;
+    padding-top: 50px;
+  }
   .wbb-directory-grid {
     display: flex;
     flex-wrap: wrap;
@@ -40,20 +49,32 @@
     margin: 0 auto;
   }
   .wbb-member-card {
-    background: white;
+    background: var(--card-bg, #ffffff);
     padding: 24px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     text-align: center;
     width: 240px;
-    height: 364px;
+    height: 560px;
     display: flex;
     flex-direction: column;
     align-items: center;
     transition: transform 0.2s;
   }
+  .wbb-officer-card {
+    height: 594px;
+  }
   .wbb-member-card:hover {
     transform: translateY(-5px);
+  }
+  .wbb-officer-position {
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--card-name, #4D0011);
+    margin: 0 0 10px;
   }
   .wbb-member-photo {
     width: 150px;
@@ -75,26 +96,36 @@
     font-weight: 700;
     font-size: 22px;
     line-height: 1.2;
-    color: #4D0011;
+    color: var(--card-name, #4D0011);
     margin: 0;
     min-height: 54px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .wbb-member-business {
+  .wbb-member-logo-wrap {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    min-height: 96px;
+    margin-top: 8px;
+  }
+  .wbb-member-logo {
+    height: 80px;
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
+  }
+  .wbb-member-business {
     font-family: 'Poppins', system-ui, -apple-system, sans-serif;
     font-weight: 700;
-    color: #152D2E;
+    color: var(--card-business, #152D2E);
     font-size: 15px;
-    margin: 8px 0 0;
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
+    margin: 6px 0 0;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .wbb-member-business span {
     display: -webkit-box;
@@ -102,12 +133,27 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .wbb-member-logo {
-    width: 48px;
-    height: 48px;
-    border-radius: 6px;
-    object-fit: contain;
-    flex-shrink: 0;
+  .wbb-member-contact {
+    color: var(--card-name, #4D0011);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 8px 0 0;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .wbb-member-contact p {
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wbb-member-contact a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .wbb-member-contact a:hover {
+    text-decoration: underline;
   }
   .wbb-member-social {
     display: flex;
@@ -121,7 +167,7 @@
     display: inline-flex;
     width: 20px;
     height: 20px;
-    color: #DC9750;
+    color: var(--card-social, #DC9750);
     transition: opacity 0.2s;
   }
   .wbb-member-social a:hover {
@@ -140,6 +186,10 @@
   <h1>WBB Member Directory</h1>
 </div>
 
+<h2 class="wbb-directory-section-title">Officers</h2>
+<div id="wbb-officer-directory" class="wbb-directory-grid"></div>
+
+<h2 class="wbb-directory-section-title">Members</h2>
 <div id="wbb-member-directory" class="wbb-directory-grid"></div>
 
 <script>
@@ -163,7 +213,21 @@
       key: 'tiktok',
       label: 'TikTok',
       icon: '<svg viewBox="0 0 24 24"><path d="M14.5 2h2.9c.2 1.5.9 2.8 2 3.7 1 .8 2.2 1.3 3.6 1.4v3c-1.5 0-2.9-.4-4.2-1.1v6.8c0 3.4-2.8 6.2-6.2 6.2S6.4 19.2 6.4 15.8c0-3.2 2.4-5.8 5.5-6.1v3c-1.4.3-2.5 1.6-2.5 3.1 0 1.7 1.4 3.1 3.1 3.1s3.1-1.4 3.1-3.1V2z"/></svg>'
+    },
+    {
+      key: 'linkedin',
+      label: 'LinkedIn',
+      icon: '<svg viewBox="0 0 24 24"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.1c.5-1 1.8-2 3.7-2 4 0 4.7 2.6 4.7 6V21h-4v-5.3c0-1.3 0-2.9-1.8-2.9s-2 1.4-2 2.8V21h-4V9z"/></svg>'
     }
+  ];
+
+  // Board members get a featured card at the top of the directory, matched
+  // to their API record by name, in this fixed display order.
+  const OFFICERS = [
+    { name: 'Kim Sherman', position: 'President', theme: { background: '#4d0011', name: '#ffffff', business: '#dc9750', social: '#e6dac4' } },
+    { name: 'Kym Housley', position: 'Treasurer', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750' } },
+    { name: 'Tim De Paepe', position: 'Secretary', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750' } },
+    { name: 'Jennifer Nunley', position: 'Membership', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750' } }
   ];
 
   function buildSocialLinks(member) {
@@ -173,32 +237,78 @@
       .join('');
   }
 
+  function buildContactRows(member) {
+    const rows = [];
+    if (member.contactNumber) {
+      rows.push(`<p>${member.contactNumber}</p>`);
+    }
+    if (member.email) {
+      rows.push(`<p><a href="mailto:${member.email}">${member.email}</a></p>`);
+    }
+    if (member.website) {
+      const websiteHref = /^https?:\/\//i.test(member.website) ? member.website : `https://${member.website}`;
+      rows.push(`<p><a href="${websiteHref}" target="_blank" rel="noopener noreferrer">${member.website}</a></p>`);
+    }
+    if (member.businessAddress) {
+      rows.push(`<p>${member.businessAddress}</p>`);
+    }
+    return rows.join('');
+  }
+
+  function renderCard(member, officer) {
+    const card = document.createElement('div');
+    card.className = officer ? 'wbb-member-card wbb-officer-card' : 'wbb-member-card';
+
+    if (officer) {
+      card.style.setProperty('--card-bg', officer.theme.background);
+      card.style.setProperty('--card-name', officer.theme.name);
+      card.style.setProperty('--card-business', officer.theme.business);
+      card.style.setProperty('--card-social', officer.theme.social);
+    }
+
+    const hasPhoto = Boolean(member.photo);
+    const photoClass = hasPhoto ? 'wbb-member-photo' : 'wbb-member-photo wbb-member-photo--placeholder';
+    const photoSrc = hasPhoto ? member.photo : '/wbb-logo-burgundy.svg';
+
+    card.innerHTML = `
+      ${officer ? `<p class="wbb-officer-position">${officer.position}</p>` : ''}
+      <img class="${photoClass}" src="${photoSrc}" alt="${member.name}"
+        onerror="this.onerror=null;this.src='/wbb-logo-burgundy.svg';this.classList.add('wbb-member-photo--placeholder')">
+      <p class="wbb-member-name">${member.name}</p>
+      <div class="wbb-member-logo-wrap">
+        ${member.businessLogo ? `<img class="wbb-member-logo" src="${member.businessLogo}" alt="${member.businessName} logo" onerror="this.remove()">` : ''}
+      </div>
+      <p class="wbb-member-business"><span>${member.businessName}</span></p>
+      <div class="wbb-member-contact">${buildContactRows(member)}</div>
+      <p class="wbb-member-social">${buildSocialLinks(member)}</p>
+    `;
+    return card;
+  }
+
   // Calls the Netlify serverless function that securely proxies JotForm.
   fetch('/api/directory')
     .then(response => response.json())
     .then(members => {
-      const directoryContainer = document.getElementById('wbb-member-directory');
-      directoryContainer.innerHTML = '';
+      const officerContainer = document.getElementById('wbb-officer-directory');
+      const memberContainer = document.getElementById('wbb-member-directory');
+      officerContainer.innerHTML = '';
+      memberContainer.innerHTML = '';
 
-      members.forEach(member => {
-        const memberCard = document.createElement('div');
-        memberCard.className = 'wbb-member-card';
+      const remainingMembers = members.slice();
 
-        const hasPhoto = Boolean(member.photo);
-        const photoClass = hasPhoto ? 'wbb-member-photo' : 'wbb-member-photo wbb-member-photo--placeholder';
-        const photoSrc = hasPhoto ? member.photo : '/wbb-logo-burgundy.svg';
+      OFFICERS.forEach(officer => {
+        const matchIndex = remainingMembers.findIndex(
+          member => member.name.toLowerCase().trim() === officer.name.toLowerCase().trim()
+        );
+        if (matchIndex === -1) {
+          return;
+        }
+        const [member] = remainingMembers.splice(matchIndex, 1);
+        officerContainer.appendChild(renderCard(member, officer));
+      });
 
-        memberCard.innerHTML = `
-          <img class="${photoClass}" src="${photoSrc}" alt="${member.name}"
-            onerror="this.onerror=null;this.src='/wbb-logo-burgundy.svg';this.classList.add('wbb-member-photo--placeholder')">
-          <p class="wbb-member-name">${member.name}</p>
-          <p class="wbb-member-business">
-            ${member.businessLogo ? `<img class="wbb-member-logo" src="${member.businessLogo}" alt="${member.businessName} logo" onerror="this.remove()">` : ''}
-            <span>${member.businessName}</span>
-          </p>
-          <p class="wbb-member-social">${buildSocialLinks(member)}</p>
-        `;
-        directoryContainer.appendChild(memberCard);
+      remainingMembers.forEach(member => {
+        memberContainer.appendChild(renderCard(member));
       });
     })
     .catch(error => {

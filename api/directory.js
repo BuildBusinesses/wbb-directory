@@ -37,6 +37,30 @@ function buildSocialUrl(rawValue, platformBaseUrl) {
   return platformBaseUrl + encodeURIComponent(trimmed.replace(/^@/, ''));
 }
 
+// Phone answers come back as { area, phone } sub-answers.
+function formatPhone(phoneAnswer) {
+  if (!phoneAnswer || typeof phoneAnswer !== 'object') {
+    return '';
+  }
+  const area = (phoneAnswer.area || '').trim();
+  const phone = (phoneAnswer.phone || '').trim();
+  if (!area && !phone) {
+    return '';
+  }
+  return area ? `(${area}) ${phone}` : phone;
+}
+
+// Address answers come back as { addr_line1, addr_line2, city, state, postal,
+// country } sub-answers; the field is optional so most of these are blank.
+function formatAddress(addressAnswer) {
+  if (!addressAnswer || typeof addressAnswer !== 'object') {
+    return '';
+  }
+  const { addr_line1: line1, addr_line2: line2, city, state, postal } = addressAnswer;
+  const cityStateZip = [city, [state, postal].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  return [line1, line2, cityStateZip].filter(Boolean).join(', ');
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
@@ -83,12 +107,24 @@ export default async function handler(req, res) {
           dateCreated: submission.created_at,
           name,
           businessName: answersByLabel['business name'] || '',
+          title: answersByLabel['title'] || '',
           photo: extractFileUrl(answersByLabel['headshot']),
           businessLogo: extractFileUrl(answersByLabel['business logo']),
+          video: extractFileUrl(answersByLabel['video']),
+          email: answersByLabel['e-mail'] || '',
+          website: answersByLabel['website'] || '',
+          contactNumber: formatPhone(answersByLabel['contact number']),
+          businessAddress: formatAddress(answersByLabel['business address (if you want it listed)']),
+          tellUsAboutYou: answersByLabel['tell us about you'] || '',
+          tellUsAboutBusiness: answersByLabel['tell us about your business'] || '',
+          testimonials: answersByLabel['testimonials'] || '',
+          tips: answersByLabel['tips'] || '',
           instagram: buildSocialUrl(answersByLabel['instagram'], 'https://www.instagram.com/'),
           facebook: buildSocialUrl(answersByLabel['facebook'], 'https://www.facebook.com/'),
           twitter: buildSocialUrl(answersByLabel['x (twitter)'], 'https://x.com/'),
           tiktok: buildSocialUrl(answersByLabel['tiktok'], 'https://www.tiktok.com/@'),
+          linkedin: buildSocialUrl(answersByLabel['linkedin'], 'https://www.linkedin.com/in/'),
+          youtube: answersByLabel['youtube'] || '',
           status: answersByLabel['status'] || 'Active'
         };
       })
@@ -117,7 +153,13 @@ export default async function handler(req, res) {
 
       const merged = { ...memberSubmissions[0] };
 
-      for (const field of ['name', 'businessName', 'photo', 'businessLogo', 'instagram', 'facebook', 'twitter', 'tiktok', 'status']) {
+      for (const field of [
+        'name', 'businessName', 'title', 'photo', 'businessLogo', 'video',
+        'email', 'website', 'contactNumber', 'businessAddress',
+        'tellUsAboutYou', 'tellUsAboutBusiness', 'testimonials', 'tips',
+        'instagram', 'facebook', 'twitter', 'tiktok', 'linkedin', 'youtube',
+        'status'
+      ]) {
         if (!merged[field]) {
           const fallback = memberSubmissions.find(submission => submission[field]);
           if (fallback) {
