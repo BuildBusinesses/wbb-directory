@@ -6,7 +6,7 @@
 <title>WBB Membership Directory</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --wbb-forest-green: #0B2B26;
@@ -46,7 +46,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     text-align: center;
     width: 240px;
-    height: 330px;
+    height: 364px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -87,7 +87,9 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    color: var(--wbb-text-muted);
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    color: #152D2E;
     font-size: 15px;
     margin: 8px 0 0;
     flex: 1;
@@ -107,6 +109,29 @@
     object-fit: contain;
     flex-shrink: 0;
   }
+  .wbb-member-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 22px;
+    margin-top: 10px;
+  }
+  .wbb-member-social a {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    color: #DC9750;
+    transition: opacity 0.2s;
+  }
+  .wbb-member-social a:hover {
+    opacity: 0.7;
+  }
+  .wbb-member-social svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
 </style>
 </head>
 <body>
@@ -118,6 +143,36 @@
 <div id="wbb-member-directory" class="wbb-directory-grid"></div>
 
 <script>
+  const SOCIAL_PLATFORMS = [
+    {
+      key: 'instagram',
+      label: 'Instagram',
+      icon: '<svg viewBox="0 0 24 24"><path d="M12 2c-2.7 0-3.1 0-4.1.1-1 .1-1.7.2-2.3.5-.6.2-1.1.6-1.6 1.1-.5.5-.8 1-1.1 1.6-.3.6-.4 1.3-.5 2.3C2 8.9 2 9.3 2 12s0 3.1.1 4.1c.1 1 .2 1.7.5 2.3.2.6.6 1.1 1.1 1.6.5.5 1 .8 1.6 1.1.6.3 1.3.4 2.3.5 1 .1 1.4.1 4.1.1s3.1 0 4.1-.1c1-.1 1.7-.2 2.3-.5.6-.2 1.1-.6 1.6-1.1.5-.5.8-1 1.1-1.6.3-.6.4-1.3.5-2.3.1-1 .1-1.4.1-4.1s0-3.1-.1-4.1c-.1-1-.2-1.7-.5-2.3-.2-.6-.6-1.1-1.1-1.6-.5-.5-1-.8-1.6-1.1-.6-.3-1.3-.4-2.3-.5C15.1 2 14.7 2 12 2zm0 1.8c2.6 0 3 0 4 .1.9.1 1.4.2 1.8.3.4.2.7.4 1 .7.3.3.5.6.7 1 .1.4.3.9.3 1.8.1 1 .1 1.4.1 4s0 3-.1 4c-.1.9-.2 1.4-.3 1.8-.2.4-.4.7-.7 1-.3.3-.6.5-1 .7-.4.1-.9.3-1.8.3-1 .1-1.4.1-4 .1s-3 0-4-.1c-.9-.1-1.4-.2-1.8-.3-.4-.2-.7-.4-1-.7-.3-.3-.5-.6-.7-1-.1-.4-.3-.9-.3-1.8-.1-1-.1-1.4-.1-4s0-3 .1-4c.1-.9.2-1.4.3-1.8.2-.4.4-.7.7-1 .3-.3.6-.5 1-.7.4-.1.9-.3 1.8-.3 1-.1 1.4-.1 4-.1zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 1.8a3.2 3.2 0 1 1 0 6.4 3.2 3.2 0 0 1 0-6.4zm5.2-2.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg>'
+    },
+    {
+      key: 'facebook',
+      label: 'Facebook',
+      icon: '<svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>'
+    },
+    {
+      key: 'twitter',
+      label: 'X (Twitter)',
+      icon: '<svg viewBox="0 0 24 24"><path d="M18.9 2H22l-7.5 8.6L23 22h-6.6l-5.2-6.8L5.2 22H2l8-9.2L1.5 2h6.8l4.7 6.2L18.9 2zm-1.2 18h1.8L7 4H5.1l12.6 16z"/></svg>'
+    },
+    {
+      key: 'tiktok',
+      label: 'TikTok',
+      icon: '<svg viewBox="0 0 24 24"><path d="M14.5 2h2.9c.2 1.5.9 2.8 2 3.7 1 .8 2.2 1.3 3.6 1.4v3c-1.5 0-2.9-.4-4.2-1.1v6.8c0 3.4-2.8 6.2-6.2 6.2S6.4 19.2 6.4 15.8c0-3.2 2.4-5.8 5.5-6.1v3c-1.4.3-2.5 1.6-2.5 3.1 0 1.7 1.4 3.1 3.1 3.1s3.1-1.4 3.1-3.1V2z"/></svg>'
+    }
+  ];
+
+  function buildSocialLinks(member) {
+    return SOCIAL_PLATFORMS
+      .filter(platform => member[platform.key])
+      .map(platform => `<a href="${member[platform.key]}" target="_blank" rel="noopener noreferrer" aria-label="${member.name} on ${platform.label}">${platform.icon}</a>`)
+      .join('');
+  }
+
   // Calls the Netlify serverless function that securely proxies JotForm.
   fetch('/api/directory')
     .then(response => response.json())
@@ -134,12 +189,14 @@
         const photoSrc = hasPhoto ? member.photo : '/wbb-logo-burgundy.svg';
 
         memberCard.innerHTML = `
-          <img class="${photoClass}" src="${photoSrc}" alt="${member.name}">
+          <img class="${photoClass}" src="${photoSrc}" alt="${member.name}"
+            onerror="this.onerror=null;this.src='/wbb-logo-burgundy.svg';this.classList.add('wbb-member-photo--placeholder')">
           <p class="wbb-member-name">${member.name}</p>
           <p class="wbb-member-business">
-            ${member.businessLogo ? `<img class="wbb-member-logo" src="${member.businessLogo}" alt="${member.businessName} logo">` : ''}
+            ${member.businessLogo ? `<img class="wbb-member-logo" src="${member.businessLogo}" alt="${member.businessName} logo" onerror="this.remove()">` : ''}
             <span>${member.businessName}</span>
           </p>
+          <p class="wbb-member-social">${buildSocialLinks(member)}</p>
         `;
         directoryContainer.appendChild(memberCard);
       });
