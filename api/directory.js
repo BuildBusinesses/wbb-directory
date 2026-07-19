@@ -105,6 +105,7 @@ export default async function handler(req, res) {
         return {
           id: submission.id,
           dateCreated: submission.created_at,
+          dateUpdated: submission.updated_at || submission.created_at,
           name,
           businessName: answersByLabel['business name'] || '',
           title: answersByLabel['title'] || '',
@@ -149,7 +150,11 @@ export default async function handler(req, res) {
     const mergedMembers = [];
 
     for (const memberSubmissions of submissionsByBusinessName.values()) {
-      memberSubmissions.sort((a, b) => new Date(b.dateCreated) - new Date(a.dateCreated));
+      // Prefer the most recently *updated* submission, not just the most
+      // recently created one -- an older submission that was hand-edited
+      // (e.g. in Jotform Tables) after a newer one was created should still
+      // win if its edit is the freshest data we have.
+      memberSubmissions.sort((a, b) => new Date(b.dateUpdated) - new Date(a.dateUpdated));
 
       const merged = { ...memberSubmissions[0] };
 
