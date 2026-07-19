@@ -52,13 +52,16 @@ function formatPhone(phoneAnswer) {
 
 // Address answers come back as { addr_line1, addr_line2, city, state, postal,
 // country } sub-answers; the field is optional so most of these are blank.
+// The two logical halves (street vs. city/state/zip) are joined with a "\n"
+// so the frontend can render them on separate lines without guessing.
 function formatAddress(addressAnswer) {
   if (!addressAnswer || typeof addressAnswer !== 'object') {
     return '';
   }
   const { addr_line1: line1, addr_line2: line2, city, state, postal } = addressAnswer;
+  const street = [line1, line2].filter(Boolean).join(', ');
   const cityStateZip = [city, [state, postal].filter(Boolean).join(' ')].filter(Boolean).join(', ');
-  return [line1, line2, cityStateZip].filter(Boolean).join(', ');
+  return [street, cityStateZip].filter(Boolean).join('\n');
 }
 
 export default async function handler(req, res) {

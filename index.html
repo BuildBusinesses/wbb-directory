@@ -48,6 +48,26 @@
     max-width: 1200px;
     margin: 0 auto;
   }
+  .wbb-officer-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 240px);
+    justify-content: center;
+    gap: 40px;
+    padding: 60px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  @media (max-width: 1119px) {
+    .wbb-officer-grid {
+      grid-template-columns: repeat(2, 240px);
+    }
+  }
+  @media (max-width: 600px) {
+    .wbb-officer-grid {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+  }
   .wbb-member-card {
     background: var(--card-bg, #ffffff);
     padding: 24px;
@@ -136,17 +156,20 @@
   .wbb-member-contact {
     color: var(--card-name, #4D0011);
     font-size: 13px;
-    line-height: 1.5;
+    line-height: 1.4;
     margin: 8px 0 0;
     flex: 1;
     min-height: 0;
     overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
   }
   .wbb-member-contact p {
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin: 0 0 6px;
+    max-width: 100%;
+  }
+  .wbb-member-contact p:last-child {
+    margin-bottom: 0;
   }
   .wbb-member-contact a {
     color: inherit;
@@ -154,6 +177,36 @@
   }
   .wbb-member-contact a:hover {
     text-decoration: underline;
+  }
+  .wbb-contact-line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wbb-contact-address {
+    font-weight: 700;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .wbb-member-website-btn {
+    display: inline-block;
+    max-width: 100%;
+    box-sizing: border-box;
+    background: var(--card-button-bg, #5D7772);
+    color: var(--card-button-text, #ffffff);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wbb-member-website-btn:hover {
+    opacity: 0.85;
+    text-decoration: none;
   }
   .wbb-member-social {
     display: flex;
@@ -187,7 +240,7 @@
 </div>
 
 <h2 class="wbb-directory-section-title">Officers</h2>
-<div id="wbb-officer-directory" class="wbb-directory-grid"></div>
+<div id="wbb-officer-directory" class="wbb-officer-grid"></div>
 
 <h2 class="wbb-directory-section-title">Members</h2>
 <div id="wbb-member-directory" class="wbb-directory-grid"></div>
@@ -224,11 +277,19 @@
   // Board members get a featured card at the top of the directory, matched
   // to their API record by name, in this fixed display order.
   const OFFICERS = [
-    { name: 'Kim Sherman', position: 'President', theme: { background: '#4d0011', name: '#ffffff', business: '#dc9750', social: '#e6dac4' } },
-    { name: 'Kym Housley', position: 'Treasurer', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750' } },
-    { name: 'Tim De Paepe', position: 'Secretary', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750' } },
-    { name: 'Jennifer Nunley', position: 'Membership', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750' } }
+    { name: 'Kim Sherman', position: 'President', theme: { background: '#4d0011', name: '#ffffff', business: '#dc9750', social: '#e6dac4', buttonBg: '#dc9750', buttonText: '#4d0011' } },
+    { name: 'Kym Housley', position: 'Treasurer', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011', buttonText: '#ffffff' } },
+    { name: 'Tim De Paepe', position: 'Secretary', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011', buttonText: '#ffffff' } },
+    { name: 'Jennifer Nunley', position: 'Membership', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011', buttonText: '#ffffff' } }
   ];
+
+  function getRootDomain(websiteHref) {
+    try {
+      return new URL(websiteHref).hostname.replace(/^www\./i, '');
+    } catch (e) {
+      return websiteHref;
+    }
+  }
 
   function buildSocialLinks(member) {
     return SOCIAL_PLATFORMS
@@ -240,17 +301,19 @@
   function buildContactRows(member) {
     const rows = [];
     if (member.contactNumber) {
-      rows.push(`<p>${member.contactNumber}</p>`);
+      rows.push(`<p class="wbb-contact-line">${member.contactNumber}</p>`);
     }
     if (member.email) {
-      rows.push(`<p><a href="mailto:${member.email}">${member.email}</a></p>`);
+      rows.push(`<p class="wbb-contact-line"><a href="mailto:${member.email}">${member.email}</a></p>`);
     }
     if (member.website) {
       const websiteHref = /^https?:\/\//i.test(member.website) ? member.website : `https://${member.website}`;
-      rows.push(`<p><a href="${websiteHref}" target="_blank" rel="noopener noreferrer">${member.website}</a></p>`);
+      const rootDomain = getRootDomain(websiteHref);
+      rows.push(`<p><a class="wbb-member-website-btn" href="${websiteHref}" target="_blank" rel="noopener noreferrer" title="${member.website}">${rootDomain}</a></p>`);
     }
     if (member.businessAddress) {
-      rows.push(`<p>${member.businessAddress}</p>`);
+      const addressHtml = member.businessAddress.split('\n').join('<br>');
+      rows.push(`<p class="wbb-contact-address">${addressHtml}</p>`);
     }
     return rows.join('');
   }
@@ -264,6 +327,8 @@
       card.style.setProperty('--card-name', officer.theme.name);
       card.style.setProperty('--card-business', officer.theme.business);
       card.style.setProperty('--card-social', officer.theme.social);
+      card.style.setProperty('--card-button-bg', officer.theme.buttonBg);
+      card.style.setProperty('--card-button-text', officer.theme.buttonText);
     }
 
     const hasPhoto = Boolean(member.photo);
