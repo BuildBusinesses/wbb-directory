@@ -50,19 +50,19 @@
   }
   .wbb-officer-grid {
     display: grid;
-    grid-template-columns: repeat(4, 240px);
+    grid-template-columns: repeat(4, 210px);
     justify-content: center;
-    gap: 40px;
+    gap: 20px;
     padding: 60px 20px;
     max-width: 1200px;
     margin: 0 auto;
   }
-  @media (max-width: 1119px) {
+  @media (max-width: 959px) {
     .wbb-officer-grid {
-      grid-template-columns: repeat(2, 240px);
+      grid-template-columns: repeat(2, 210px);
     }
   }
-  @media (max-width: 600px) {
+  @media (max-width: 500px) {
     .wbb-officer-grid {
       grid-template-columns: 1fr;
       justify-items: center;
@@ -82,7 +82,12 @@
     transition: transform 0.2s;
   }
   .wbb-officer-card {
+    width: 210px;
     height: 594px;
+    padding: 20px;
+  }
+  .wbb-officer-card .wbb-member-logo {
+    max-width: 140px;
   }
   .wbb-member-card:hover {
     transform: translateY(-5px);
@@ -171,11 +176,11 @@
   .wbb-member-contact p:last-child {
     margin-bottom: 0;
   }
-  .wbb-member-contact a {
+  .wbb-member-contact a:not(.wbb-member-website-btn) {
     color: inherit;
     text-decoration: none;
   }
-  .wbb-member-contact a:hover {
+  .wbb-member-contact a:not(.wbb-member-website-btn):hover {
     text-decoration: underline;
   }
   .wbb-contact-line {
@@ -194,7 +199,7 @@
     max-width: 100%;
     box-sizing: border-box;
     background: var(--card-button-bg, #5D7772);
-    color: var(--card-button-text, #ffffff);
+    color: #ffffff;
     padding: 4px 12px;
     border-radius: 8px;
     font-size: 12px;
@@ -277,10 +282,10 @@
   // Board members get a featured card at the top of the directory, matched
   // to their API record by name, in this fixed display order.
   const OFFICERS = [
-    { name: 'Kim Sherman', position: 'President', theme: { background: '#4d0011', name: '#ffffff', business: '#dc9750', social: '#e6dac4', buttonBg: '#dc9750', buttonText: '#4d0011' } },
-    { name: 'Kym Housley', position: 'Treasurer', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011', buttonText: '#ffffff' } },
-    { name: 'Tim De Paepe', position: 'Secretary', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011', buttonText: '#ffffff' } },
-    { name: 'Jennifer Nunley', position: 'Membership', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011', buttonText: '#ffffff' } }
+    { name: 'Kim Sherman', position: 'President', theme: { background: '#4d0011', name: '#ffffff', business: '#dc9750', social: '#e6dac4', buttonBg: '#dc9750' } },
+    { name: 'Kym Housley', position: 'Treasurer', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } },
+    { name: 'Tim De Paepe', position: 'Secretary', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } },
+    { name: 'Jennifer Nunley', position: 'Membership', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } }
   ];
 
   function getRootDomain(websiteHref) {
@@ -328,7 +333,6 @@
       card.style.setProperty('--card-business', officer.theme.business);
       card.style.setProperty('--card-social', officer.theme.social);
       card.style.setProperty('--card-button-bg', officer.theme.buttonBg);
-      card.style.setProperty('--card-button-text', officer.theme.buttonText);
     }
 
     const hasPhoto = Boolean(member.photo);
