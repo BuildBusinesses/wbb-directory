@@ -48,26 +48,6 @@
     max-width: 1200px;
     margin: 0 auto;
   }
-  .wbb-officer-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 210px);
-    justify-content: center;
-    gap: 20px;
-    padding: 60px 20px;
-    max-width: 1200px;
-    margin: 0 auto;
-  }
-  @media (max-width: 959px) {
-    .wbb-officer-grid {
-      grid-template-columns: repeat(2, 210px);
-    }
-  }
-  @media (max-width: 500px) {
-    .wbb-officer-grid {
-      grid-template-columns: 1fr;
-      justify-items: center;
-    }
-  }
   .wbb-member-card {
     box-sizing: border-box;
     background: var(--card-bg, #ffffff);
@@ -76,19 +56,14 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     text-align: center;
     width: 240px;
-    height: 560px;
+    height: 650px;
     display: flex;
     flex-direction: column;
     align-items: center;
     transition: transform 0.2s;
   }
   .wbb-officer-card {
-    width: 210px;
-    height: 594px;
-    padding: 20px;
-  }
-  .wbb-officer-card .wbb-member-logo {
-    max-width: 140px;
+    height: 686px;
   }
   .wbb-member-card:hover {
     transform: translateY(-5px);
@@ -97,10 +72,11 @@
     font-family: 'Poppins', system-ui, -apple-system, sans-serif;
     font-weight: 700;
     font-size: 12px;
+    line-height: 1.3;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--card-name, #4D0011);
-    margin: 0 0 10px;
+    margin: 0 0 12px;
   }
   .wbb-member-photo {
     width: 150px;
@@ -162,8 +138,8 @@
   .wbb-member-contact {
     color: var(--card-name, #4D0011);
     font-size: 13px;
-    line-height: 1.4;
-    margin: 8px 0 0;
+    line-height: 1.5;
+    margin: 10px 0 0;
     flex: 1;
     min-height: 0;
     overflow: hidden;
@@ -171,7 +147,7 @@
     box-sizing: border-box;
   }
   .wbb-member-contact p {
-    margin: 0 0 6px;
+    margin: 0 0 8px;
     max-width: 100%;
   }
   .wbb-member-contact p:last-child {
@@ -246,7 +222,7 @@
 </div>
 
 <h2 class="wbb-directory-section-title">Officers</h2>
-<div id="wbb-officer-directory" class="wbb-officer-grid"></div>
+<div id="wbb-officer-directory" class="wbb-directory-grid"></div>
 
 <h2 class="wbb-directory-section-title">Members</h2>
 <div id="wbb-member-directory" class="wbb-directory-grid"></div>
