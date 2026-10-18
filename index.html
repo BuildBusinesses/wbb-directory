@@ -40,22 +40,35 @@
     padding-top: 50px;
   }
   .wbb-directory-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 40px;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 24px;
     padding: 60px 20px;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+    box-sizing: border-box;
+  }
+  @media (max-width: 1099px) {
+    .wbb-directory-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  @media (max-width: 899px) {
+    .wbb-directory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 679px) {
+    .wbb-directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 479px) {
+    .wbb-directory-grid { grid-template-columns: minmax(0, 260px); justify-content: center; }
   }
   .wbb-member-card {
     box-sizing: border-box;
     background: var(--card-bg, #ffffff);
-    padding: 24px;
+    padding: 20px 16px;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     text-align: center;
-    width: 240px;
+    width: 100%;
+    min-width: 0;
     height: 650px;
     display: flex;
     flex-direction: column;
@@ -115,7 +128,7 @@
   .wbb-member-logo {
     height: 80px;
     width: auto;
-    max-width: 160px;
+    max-width: 100%;
     object-fit: contain;
   }
   .wbb-member-business {
@@ -260,10 +273,16 @@
   // to their API record by name, in this fixed display order.
   const OFFICERS = [
     { name: 'Kim Sherman', position: 'President', theme: { background: '#4d0011', name: '#ffffff', business: '#dc9750', social: '#e6dac4', buttonBg: '#dc9750' } },
+    { name: 'Andy Drake', position: 'Vice President', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } },
     { name: 'Kym Housley', position: 'Treasurer', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } },
     { name: 'Tim De Paepe', position: 'Secretary', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } },
     { name: 'Jennifer Nunley', position: 'Membership', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } }
   ];
+
+  // Ignore case and spacing so "Tim DePaepe" still matches "Tim De Paepe".
+  function normalizeName(name) {
+    return String(name || '').toLowerCase().replace(/[^a-z]/g, '');
+  }
 
   function getRootDomain(websiteHref) {
     try {
@@ -344,7 +363,7 @@
 
       OFFICERS.forEach(officer => {
         const matchIndex = remainingMembers.findIndex(
-          member => member.name.toLowerCase().trim() === officer.name.toLowerCase().trim()
+          member => normalizeName(member.name) === normalizeName(officer.name)
         );
         if (matchIndex === -1) {
           return;
