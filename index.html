@@ -1,48 +1,441 @@
---- live/index.html	2026-10-28 08:21:31.187368368 -0700
-+++ out/index.html	2026-10-28 08:24:03.309030643 -0700
-@@ -118,6 +118,9 @@
-     align-items: center;
-     justify-content: center;
-   }
-+  .wbb-card-clickable {
-+    cursor: pointer;
-+  }
-   .wbb-profile-link {
-     color: inherit;
-     text-decoration: none;
-@@ -293,16 +296,16 @@
-     'Kim Sherman': '/attorney',
-     'Andy Drake': '/Architect',
-     'Eva Long': '/book-coach-editor-publisher',
--    'KL Wells': '/Business-coach',
-+    'KL Wells': '/business-coach',
-     'Tim De Paepe': '/financial-advisor',
--    'Ellen Syversen': '/functional-nutrition',
-+    'Ellen Syversen': '/functional-nutritionist',
-     'Austin Loveys': '/general-contractor',
--    'Megan Walla': '/Interior-design',
-+    'Megan Walla': '/interior-design',
-     'Kym Housley': '/insurance-auto-life-commercial',
-     'Dan Schroeder': '/it-managed-service-provider',
-     'Iquo Inyang': '/marketing',
-     'Jennifer Nunley': '/Mortgage-Advisor',
--    'Kevin Sabato': '/payroll-and-HR-support',
-+    'Kevin Sabato': '/payroll-and-hr-support',
-     'Marshall Ohvall': '/pest-control',
-     'Anne Geertsen': '/real-estate',
-     'Wyatt Dean': '/structural-engineer'
-@@ -390,6 +393,15 @@
-       <div class="wbb-member-contact">${buildContactRows(member)}</div>
-       <p class="wbb-member-social">${buildSocialLinks(member)}</p>
-     `;
-+    // Tapping anywhere on the card opens the profile, except the card's own
-+    // links (email, website, social), which keep doing their own thing.
-+    if (profileUrl) {
-+      card.classList.add('wbb-card-clickable');
-+      card.addEventListener('click', event => {
-+        if (event.target.closest('a')) return;
-+        window.top.location.href = profileUrl;
-+      });
-+    }
-     return card;
-   }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WBB Membership Directory</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --wbb-forest-green: #0B2B26;
+    --wbb-ochre: #D39E59;
+    --wbb-cream: #FAF6F0;
+    --wbb-text-muted: #666666;
+  }
+  body {
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--wbb-cream);
+    margin: 0;
+    padding: 0;
+  }
+  .wbb-directory-header {
+    background-color: var(--wbb-forest-green);
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .wbb-directory-header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+  }
+  .wbb-directory-section-title {
+    text-align: center;
+    font-family: 'Barlow', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    color: var(--wbb-forest-green);
+    font-size: 1.8rem;
+    margin: 0;
+    padding-top: 50px;
+  }
+  .wbb-directory-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 24px;
+    padding: 60px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+  @media (max-width: 1099px) {
+    .wbb-directory-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+  @media (max-width: 899px) {
+    .wbb-directory-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (max-width: 679px) {
+    .wbb-directory-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+  @media (max-width: 479px) {
+    .wbb-directory-grid { grid-template-columns: minmax(0, 260px); justify-content: center; }
+  }
+  .wbb-member-card {
+    box-sizing: border-box;
+    background: var(--card-bg, #ffffff);
+    padding: 20px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    text-align: center;
+    width: 100%;
+    min-width: 0;
+    height: 650px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s;
+  }
+  .wbb-officer-card {
+    height: 686px;
+  }
+  .wbb-member-card:hover {
+    transform: translateY(-5px);
+  }
+  .wbb-officer-position {
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    line-height: 1.3;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--card-name, #4D0011);
+    margin: 0 0 12px;
+  }
+  .wbb-member-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 16px;
+    border: 3px solid var(--wbb-ochre);
+    flex-shrink: 0;
+  }
+  .wbb-member-photo--placeholder {
+    object-fit: contain;
+    box-sizing: border-box;
+    padding: 22px;
+    background-color: var(--wbb-cream);
+  }
+  .wbb-member-name {
+    font-family: 'Barlow', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.2;
+    color: var(--card-name, #4D0011);
+    margin: 0;
+    min-height: 54px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wbb-card-clickable {
+    cursor: pointer;
+  }
+  .wbb-profile-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .wbb-profile-link:hover {
+    text-decoration: underline;
+  }
+  .wbb-member-logo-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 96px;
+    margin-top: 8px;
+  }
+  .wbb-member-logo {
+    height: 80px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .wbb-member-business {
+    font-family: 'Poppins', system-ui, -apple-system, sans-serif;
+    font-weight: 700;
+    color: var(--card-business, #152D2E);
+    font-size: 15px;
+    margin: 6px 0 0;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wbb-member-business span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .wbb-member-contact {
+    color: var(--card-name, #4D0011);
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 10px 0 0;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .wbb-member-contact p {
+    margin: 0 0 8px;
+    max-width: 100%;
+  }
+  .wbb-member-contact p:last-child {
+    margin-bottom: 0;
+  }
+  .wbb-member-contact a:not(.wbb-member-website-btn) {
+    color: inherit;
+    text-decoration: none;
+  }
+  .wbb-member-contact a:not(.wbb-member-website-btn):hover {
+    text-decoration: underline;
+  }
+  .wbb-contact-line {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wbb-contact-address {
+    font-weight: 700;
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .wbb-member-website-btn {
+    display: inline-block;
+    max-width: 100%;
+    box-sizing: border-box;
+    background: var(--card-button-bg, #5D7772);
+    color: #ffffff;
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .wbb-member-website-btn:hover {
+    opacity: 0.85;
+    text-decoration: none;
+  }
+  .wbb-member-social {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 22px;
+    margin-top: 10px;
+  }
+  .wbb-member-social a {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    color: var(--card-social, #DC9750);
+    transition: opacity 0.2s;
+  }
+  .wbb-member-social a:hover {
+    opacity: 0.7;
+  }
+  .wbb-member-social svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+</style>
+</head>
+<body>
+
+<div class="wbb-directory-header">
+  <h1>WBB Member Directory</h1>
+</div>
+
+<h2 class="wbb-directory-section-title">Officers</h2>
+<div id="wbb-officer-directory" class="wbb-directory-grid"></div>
+
+<h2 class="wbb-directory-section-title">Members</h2>
+<div id="wbb-member-directory" class="wbb-directory-grid"></div>
+
+<script>
+  const SOCIAL_PLATFORMS = [
+    {
+      key: 'instagram',
+      label: 'Instagram',
+      icon: '<svg viewBox="0 0 24 24"><path d="M12 2c-2.7 0-3.1 0-4.1.1-1 .1-1.7.2-2.3.5-.6.2-1.1.6-1.6 1.1-.5.5-.8 1-1.1 1.6-.3.6-.4 1.3-.5 2.3C2 8.9 2 9.3 2 12s0 3.1.1 4.1c.1 1 .2 1.7.5 2.3.2.6.6 1.1 1.1 1.6.5.5 1 .8 1.6 1.1.6.3 1.3.4 2.3.5 1 .1 1.4.1 4.1.1s3.1 0 4.1-.1c1-.1 1.7-.2 2.3-.5.6-.2 1.1-.6 1.6-1.1.5-.5.8-1 1.1-1.6.3-.6.4-1.3.5-2.3.1-1 .1-1.4.1-4.1s0-3.1-.1-4.1c-.1-1-.2-1.7-.5-2.3-.2-.6-.6-1.1-1.1-1.6-.5-.5-1-.8-1.6-1.1-.6-.3-1.3-.4-2.3-.5C15.1 2 14.7 2 12 2zm0 1.8c2.6 0 3 0 4 .1.9.1 1.4.2 1.8.3.4.2.7.4 1 .7.3.3.5.6.7 1 .1.4.3.9.3 1.8.1 1 .1 1.4.1 4s0 3-.1 4c-.1.9-.2 1.4-.3 1.8-.2.4-.4.7-.7 1-.3.3-.6.5-1 .7-.4.1-.9.3-1.8.3-1 .1-1.4.1-4 .1s-3 0-4-.1c-.9-.1-1.4-.2-1.8-.3-.4-.2-.7-.4-1-.7-.3-.3-.5-.6-.7-1-.1-.4-.3-.9-.3-1.8-.1-1-.1-1.4-.1-4s0-3 .1-4c.1-.9.2-1.4.3-1.8.2-.4.4-.7.7-1 .3-.3.6-.5 1-.7.4-.1.9-.3 1.8-.3 1-.1 1.4-.1 4-.1zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 1.8a3.2 3.2 0 1 1 0 6.4 3.2 3.2 0 0 1 0-6.4zm5.2-2.9a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg>'
+    },
+    {
+      key: 'facebook',
+      label: 'Facebook',
+      icon: '<svg viewBox="0 0 24 24"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.4h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>'
+    },
+    {
+      key: 'twitter',
+      label: 'X (Twitter)',
+      icon: '<svg viewBox="0 0 24 24"><path d="M18.9 2H22l-7.5 8.6L23 22h-6.6l-5.2-6.8L5.2 22H2l8-9.2L1.5 2h6.8l4.7 6.2L18.9 2zm-1.2 18h1.8L7 4H5.1l12.6 16z"/></svg>'
+    },
+    {
+      key: 'tiktok',
+      label: 'TikTok',
+      icon: '<svg viewBox="0 0 24 24"><path d="M14.5 2h2.9c.2 1.5.9 2.8 2 3.7 1 .8 2.2 1.3 3.6 1.4v3c-1.5 0-2.9-.4-4.2-1.1v6.8c0 3.4-2.8 6.2-6.2 6.2S6.4 19.2 6.4 15.8c0-3.2 2.4-5.8 5.5-6.1v3c-1.4.3-2.5 1.6-2.5 3.1 0 1.7 1.4 3.1 3.1 3.1s3.1-1.4 3.1-3.1V2z"/></svg>'
+    },
+    {
+      key: 'linkedin',
+      label: 'LinkedIn',
+      icon: '<svg viewBox="0 0 24 24"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3V9zm7 0h3.8v1.7h.1c.5-1 1.8-2 3.7-2 4 0 4.7 2.6 4.7 6V21h-4v-5.3c0-1.3 0-2.9-1.8-2.9s-2 1.4-2 2.8V21h-4V9z"/></svg>'
+    }
+  ];
+
+  // Board members get a featured card at the top of the directory, matched
+  // to their API record by name, in this fixed display order.
+  const OFFICERS = [
+    { name: 'Kim Sherman', position: 'President', theme: { background: '#4d0011', name: '#ffffff', business: '#dc9750', social: '#e6dac4', buttonBg: '#dc9750' } },
+    { name: 'Andy Drake', position: 'Vice President', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } },
+    { name: 'Kym Housley', position: 'Treasurer', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } },
+    { name: 'Tim De Paepe', position: 'Secretary', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } },
+    { name: 'Jennifer Nunley', position: 'Membership', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } }
+  ];
+
+  // Each member's profile page on the main WBB site, matched by name.
+  // To add a member: copy a line, change the name and the slug.
+  const PROFILE_BASE_URL = 'https://www.willamettebusinessbuilders.com';
+  const PROFILE_SLUGS = {
+    'Kim Sherman': '/attorney',
+    'Andy Drake': '/Architect',
+    'Eva Long': '/book-coach-editor-publisher',
+    'KL Wells': '/business-coach',
+    'Tim De Paepe': '/financial-advisor',
+    'Ellen Syversen': '/functional-nutritionist',
+    'Austin Loveys': '/general-contractor',
+    'Megan Walla': '/interior-design',
+    'Kym Housley': '/insurance-auto-life-commercial',
+    'Dan Schroeder': '/it-managed-service-provider',
+    'Iquo Inyang': '/marketing',
+    'Jennifer Nunley': '/Mortgage-Advisor',
+    'Kevin Sabato': '/payroll-and-hr-support',
+    'Marshall Ohvall': '/pest-control',
+    'Anne Geertsen': '/real-estate',
+    'Wyatt Dean': '/structural-engineer'
+  };
+
+  function getProfileUrl(member) {
+    const key = Object.keys(PROFILE_SLUGS).find(
+      name => normalizeName(name) === normalizeName(member.name)
+    );
+    return key ? PROFILE_BASE_URL + PROFILE_SLUGS[key] : '';
+  }
+
+  // Ignore case and spacing so "Tim DePaepe" still matches "Tim De Paepe".
+  function normalizeName(name) {
+    return String(name || '').toLowerCase().replace(/[^a-z]/g, '');
+  }
+
+  function getRootDomain(websiteHref) {
+    try {
+      return new URL(websiteHref).hostname.replace(/^www\./i, '');
+    } catch (e) {
+      return websiteHref;
+    }
+  }
+
+  function buildSocialLinks(member) {
+    return SOCIAL_PLATFORMS
+      .filter(platform => member[platform.key])
+      .map(platform => `<a href="${member[platform.key]}" target="_blank" rel="noopener noreferrer" aria-label="${member.name} on ${platform.label}">${platform.icon}</a>`)
+      .join('');
+  }
+
+  function buildContactRows(member) {
+    const rows = [];
+    if (member.contactNumber) {
+      rows.push(`<p class="wbb-contact-line">${member.contactNumber}</p>`);
+    }
+    if (member.email) {
+      rows.push(`<p class="wbb-contact-line"><a href="mailto:${member.email}">${member.email}</a></p>`);
+    }
+    if (member.website) {
+      const websiteHref = /^https?:\/\//i.test(member.website) ? member.website : `https://${member.website}`;
+      const rootDomain = getRootDomain(websiteHref);
+      rows.push(`<p><a class="wbb-member-website-btn" href="${websiteHref}" target="_blank" rel="noopener noreferrer" title="${member.website}">${rootDomain}</a></p>`);
+    }
+    if (member.businessAddress) {
+      const addressHtml = member.businessAddress.split('\n').join('<br>');
+      rows.push(`<p class="wbb-contact-address">${addressHtml}</p>`);
+    }
+    return rows.join('');
+  }
+
+  function renderCard(member, officer) {
+    const card = document.createElement('div');
+    card.className = officer ? 'wbb-member-card wbb-officer-card' : 'wbb-member-card';
+
+    if (officer) {
+      card.style.setProperty('--card-bg', officer.theme.background);
+      card.style.setProperty('--card-name', officer.theme.name);
+      card.style.setProperty('--card-business', officer.theme.business);
+      card.style.setProperty('--card-social', officer.theme.social);
+      card.style.setProperty('--card-button-bg', officer.theme.buttonBg);
+    }
+
+    const hasPhoto = Boolean(member.photo);
+    const photoClass = hasPhoto ? 'wbb-member-photo' : 'wbb-member-photo wbb-member-photo--placeholder';
+    const photoSrc = hasPhoto ? member.photo : '/wbb-logo-burgundy.svg';
+
+    // target="_top" opens the profile in the full window, not inside the embed.
+    const profileUrl = getProfileUrl(member);
+    const photoHtml = `<img class="${photoClass}" src="${photoSrc}" alt="${member.name}"
+        onerror="this.onerror=null;this.src='/wbb-logo-burgundy.svg';this.classList.add('wbb-member-photo--placeholder')">`;
+    const nameHtml = profileUrl
+      ? `<a class="wbb-profile-link" href="${profileUrl}" target="_top">${member.name}</a>`
+      : member.name;
+
+    card.innerHTML = `
+      ${officer ? `<p class="wbb-officer-position">${officer.position}</p>` : ''}
+      ${profileUrl ? `<a href="${profileUrl}" target="_top" aria-label="View ${member.name}'s profile">${photoHtml}</a>` : photoHtml}
+      <p class="wbb-member-name">${nameHtml}</p>
+      <div class="wbb-member-logo-wrap">
+        ${member.businessLogo ? `<img class="wbb-member-logo" src="${member.businessLogo}" alt="${member.businessName} logo" onerror="this.remove()">` : ''}
+      </div>
+      <p class="wbb-member-business"><span>${member.businessName}</span></p>
+      <div class="wbb-member-contact">${buildContactRows(member)}</div>
+      <p class="wbb-member-social">${buildSocialLinks(member)}</p>
+    `;
+    // Tapping anywhere on the card opens the profile, except the card's own
+    // links (email, website, social), which keep doing their own thing.
+    if (profileUrl) {
+      card.classList.add('wbb-card-clickable');
+      card.addEventListener('click', event => {
+        if (event.target.closest('a')) return;
+        window.top.location.href = profileUrl;
+      });
+    }
+    return card;
+  }
+
+  // Calls the Netlify serverless function that securely proxies JotForm.
+  fetch('/api/directory')
+    .then(response => response.json())
+    .then(members => {
+      const officerContainer = document.getElementById('wbb-officer-directory');
+      const memberContainer = document.getElementById('wbb-member-directory');
+      officerContainer.innerHTML = '';
+      memberContainer.innerHTML = '';
+
+      const remainingMembers = members.slice();
+
+      OFFICERS.forEach(officer => {
+        const matchIndex = remainingMembers.findIndex(
+          member => normalizeName(member.name) === normalizeName(officer.name)
+        );
+        if (matchIndex === -1) {
+          return;
+        }
+        const [member] = remainingMembers.splice(matchIndex, 1);
+        officerContainer.appendChild(renderCard(member, officer));
+      });
+
+      remainingMembers.forEach(member => {
+        memberContainer.appendChild(renderCard(member));
+      });
+    })
+    .catch(error => {
+      console.error('WBB directory load error:', error);
+      document.getElementById('wbb-member-directory').innerHTML = '<p>Error loading directory data.</p>';
+    });
+</script>
+
+</body>
+</html>
