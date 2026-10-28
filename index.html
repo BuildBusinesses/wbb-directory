@@ -118,6 +118,13 @@
     align-items: center;
     justify-content: center;
   }
+  .wbb-profile-link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .wbb-profile-link:hover {
+    text-decoration: underline;
+  }
   .wbb-member-logo-wrap {
     display: flex;
     align-items: center;
@@ -279,6 +286,35 @@
     { name: 'Jennifer Nunley', position: 'Membership', theme: { background: '#5d7772', name: '#4d0011', business: '#e6dac4', social: '#dc9750', buttonBg: '#4d0011' } }
   ];
 
+  // Each member's profile page on the main WBB site, matched by name.
+  // To add a member: copy a line, change the name and the slug.
+  const PROFILE_BASE_URL = 'https://www.willamettebusinessbuilders.com';
+  const PROFILE_SLUGS = {
+    'Kim Sherman': '/attorney',
+    'Andy Drake': '/Architect',
+    'Eva Long': '/book-coach-editor-publisher',
+    'KL Wells': '/Business-coach',
+    'Tim De Paepe': '/financial-advisor',
+    'Ellen Syversen': '/functional-nutrition',
+    'Austin Loveys': '/general-contractor',
+    'Megan Walla': '/Interior-design',
+    'Kym Housley': '/insurance-auto-life-commercial',
+    'Dan Schroeder': '/it-managed-service-provider',
+    'Iquo Inyang': '/marketing',
+    'Jennifer Nunley': '/Mortgage-Advisor',
+    'Kevin Sabato': '/payroll-and-HR-support',
+    'Marshall Ohvall': '/pest-control',
+    'Anne Geertsen': '/real-estate',
+    'Wyatt Dean': '/structural-engineer'
+  };
+
+  function getProfileUrl(member) {
+    const key = Object.keys(PROFILE_SLUGS).find(
+      name => normalizeName(name) === normalizeName(member.name)
+    );
+    return key ? PROFILE_BASE_URL + PROFILE_SLUGS[key] : '';
+  }
+
   // Ignore case and spacing so "Tim DePaepe" still matches "Tim De Paepe".
   function normalizeName(name) {
     return String(name || '').toLowerCase().replace(/[^a-z]/g, '');
@@ -335,11 +371,18 @@
     const photoClass = hasPhoto ? 'wbb-member-photo' : 'wbb-member-photo wbb-member-photo--placeholder';
     const photoSrc = hasPhoto ? member.photo : '/wbb-logo-burgundy.svg';
 
+    // target="_top" opens the profile in the full window, not inside the embed.
+    const profileUrl = getProfileUrl(member);
+    const photoHtml = `<img class="${photoClass}" src="${photoSrc}" alt="${member.name}"
+        onerror="this.onerror=null;this.src='/wbb-logo-burgundy.svg';this.classList.add('wbb-member-photo--placeholder')">`;
+    const nameHtml = profileUrl
+      ? `<a class="wbb-profile-link" href="${profileUrl}" target="_top">${member.name}</a>`
+      : member.name;
+
     card.innerHTML = `
       ${officer ? `<p class="wbb-officer-position">${officer.position}</p>` : ''}
-      <img class="${photoClass}" src="${photoSrc}" alt="${member.name}"
-        onerror="this.onerror=null;this.src='/wbb-logo-burgundy.svg';this.classList.add('wbb-member-photo--placeholder')">
-      <p class="wbb-member-name">${member.name}</p>
+      ${profileUrl ? `<a href="${profileUrl}" target="_top" aria-label="View ${member.name}'s profile">${photoHtml}</a>` : photoHtml}
+      <p class="wbb-member-name">${nameHtml}</p>
       <div class="wbb-member-logo-wrap">
         ${member.businessLogo ? `<img class="wbb-member-logo" src="${member.businessLogo}" alt="${member.businessName} logo" onerror="this.remove()">` : ''}
       </div>
